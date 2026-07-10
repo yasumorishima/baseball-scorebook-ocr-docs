@@ -1,0 +1,46 @@
+# Handwritten Scorebook Reader — 手書き野球スコアブック読解 R&D（技術解説）
+
+紙の草野球スコアブックの写真から、打席・走塁データを構造化抽出する研究開発プロジェクトの公開技術解説です。
+
+**本体リポジトリ: [`baseball-scorebook-ocr`](https://github.com/yasumorishima/baseball-scorebook-ocr) 🔒 private** — 記法解読・ソルバー設計・ground truth 転記規約などのノウハウと実データは非公開です（the method is the product）。この repo では公開できる範囲の設計思想・実績・開発プロセスを紹介します。
+
+> **English summary**: Reads handwritten Japanese amateur-baseball scorebooks from photos into structured at-bat data — no paid APIs, no cloud OCR. Deterministic computer vision (OpenCV on a Raspberry Pi 5) fused with a base-running constraint solver that only accepts readings consistent with legal baseball plays. 80% pooled occupancy accuracy on a 22-game hand-transcribed ground-truth corpus; 20 consecutive held-out sheets without a single falsification of the frozen constraint model. The main repo is private — this is the public write-up.
+
+## なぜ「未解決領域」なのか
+
+日本の野球スコアブックは独自の記号体系（守備番号の連鎖、塁到達マーク、アウトを表すローマ数字、盗塁・暴投などの機構表記…）を持ち、そこに記録者ごとの手書きの揺れ・省略・書き損じ・シート品質差が重なります。汎用 OCR やマルチモーダル LLM に写真を丸ごと渡しても実用精度は出ません（実測して確認済み）。「どの AI もまだ解けていない」ドメインです。
+
+## アプローチ: 有料 LLM Vision から、無課金 CV + 制約ソルバーへ
+
+初期は LLM Vision に前処理済みクロップを渡す方式を検証しましたが、2026-07 に方針を全面転換し、**API 課金ゼロの決定論的パイプライン**を構築しました。
+
+```
+写真 → 格子検出（deskew 込み）→ 手書きインク分離 → テンプレートマッチング（kNN）→ 塁占有制約ソルバー
+```
+
+鍵は最後の**制約ソルバー**です。テンプレート認識単体では最難クラスのマークは 4 割程度しか当たりませんが、「野球のルール上、合法な走塁として成立する読みしか受理しない」という制約層を重ねることで、複数の候補読みの中から唯一の整合解を選び出します。曖昧な手書きグリフも、イニングのアウト数・得点・走者の追い越し禁止といった試合の算術が裁定してくれます。
+
+## 実績（2026-07 時点）
+
+- ground truth: **22試合分を全打席レベルで手転記**（複数の記録者・筆記具・シート品質。促進タイブレークや両面ペアなどの特殊ケースを含む）
+- 塁占有の総合精度: **pooled 80%**（テンプレ単体 ~40% → ソルバー統合でほぼ倍増）
+- **モデル凍結後に転記した held-out 20枚連続で、制約モデルが一度も反証されていない**（パーフェクト読解のシートも出現）
+
+## 開発プロセスの規律
+
+- **frozen model + held-out 評価**: 認識モデルは凍結し、新しく転記するシートはまず「答えを見せない汎化テスト」として評価してからテンプレートに取り込む
+- **honesty ledger**: テンプレート追加のたびに「直った旧ミス」と「新たに壊れたセル」を両方記録する（テンプレ増は非単調に効く。良い話だけを書かない）
+- **敵対的レビュー**: 転記データは毎回 LLM による整合レビューにかけ、走塁の合法性・得点の算術を突合する（実際に人間の転記バグを検出した実績あり）。ただし認識パイプライン自体に生成 AI は使わない
+- **個人情報の分離**: 選手名は転記データに含めず、スコアブック画像・実試合データはリポジトリ外で管理する
+
+## 応用先
+
+草野球チーム [横浜ファニーズ公式サイト](https://github.com/yasumorishima/yokohama-funnies-docs)の試合別成績データ基盤。2026年シーズンの打撃集計は本パイプラインの ground truth データから作成済みです。
+
+## 環境
+
+Raspberry Pi 5 上の Python + OpenCV（headless）。クラウド・有料 API は不使用です。
+
+---
+
+ソースコードと手法の詳細（記法解読モデル・ソルバーの制約設計・転記規約）は [private リポジトリ](https://github.com/yasumorishima/baseball-scorebook-ocr) 🔒 にあります。興味のある方は [GitHub profile](https://github.com/yasumorishima) からどうぞ。
