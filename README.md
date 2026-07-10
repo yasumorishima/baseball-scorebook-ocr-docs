@@ -4,7 +4,7 @@
 
 **本体リポジトリ: [`baseball-scorebook-ocr`](https://github.com/yasumorishima/baseball-scorebook-ocr) 🔒 private** — 記法解読・ソルバー設計・ground truth 転記規約などのノウハウと実データは非公開です（the method is the product）。この repo では公開できる範囲の設計思想・実績・開発プロセスを紹介します。
 
-> **English summary**: Reads handwritten Japanese amateur-baseball scorebooks from photos into structured at-bat data — no paid APIs, no cloud OCR. Deterministic computer vision (OpenCV on a Raspberry Pi 5) fused with a base-running constraint solver that only accepts readings consistent with legal baseball plays. 80% pooled occupancy accuracy on a 22-game hand-transcribed ground-truth corpus; 20 consecutive held-out sheets without a single falsification of the frozen constraint model. The main repo is private — this is the public write-up.
+> **English summary**: Reads handwritten Japanese amateur-baseball scorebooks from photos into structured at-bat data — no paid APIs, no cloud OCR. Deterministic computer vision (OpenCV on a Raspberry Pi 5) fused with a base-running constraint solver that only accepts readings consistent with legal baseball plays. 80% pooled occupancy accuracy on a 25-game hand-transcribed ground-truth corpus (the complete archive); 23 consecutive held-out sheets without a single falsification of the frozen constraint model. The main repo is private — this is the public write-up.
 
 ## なぜ「未解決領域」なのか
 
@@ -22,9 +22,9 @@
 
 ## 実績（2026-07 時点）
 
-- ground truth: **22試合分を全打席レベルで手転記**（複数の記録者・筆記具・シート品質。促進タイブレークや両面ペアなどの特殊ケースを含む）
+- ground truth: **25試合分を全打席レベルで手転記（原本アーカイブ完結）**（複数の記録者・筆記具・シート品質。促進タイブレークや両面ペアなどの特殊ケースを含む）
 - 塁占有の総合精度: **pooled 80%**（テンプレ単体 ~40% → ソルバー統合でほぼ倍増）
-- **モデル凍結後に転記した held-out 20枚連続で、制約モデルが一度も反証されていない**（パーフェクト読解のシートも出現）
+- **モデル凍結後に転記した held-out 23枚連続で、制約モデルが一度も反証されていない**（パーフェクト読解のシートも出現）
 
 ## 開発プロセスの規律
 
