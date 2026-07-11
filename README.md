@@ -4,7 +4,7 @@
 
 **本体リポジトリ: [`baseball-scorebook-ocr`](https://github.com/yasumorishima/baseball-scorebook-ocr) 🔒 private** — 記法解読・ソルバー設計・ground truth 転記規約などのノウハウと実データは非公開です（the method is the product）。この repo では公開できる範囲の設計思想・実績・開発プロセスを紹介します。
 
-> **English summary**: Reads handwritten Japanese amateur-baseball scorebooks from photos into structured at-bat data — no paid APIs, no cloud OCR. Deterministic computer vision (OpenCV on a Raspberry Pi 5) fused with a base-running constraint solver that only accepts readings consistent with legal baseball plays. 81% pooled occupancy accuracy on a 25-game hand-transcribed ground-truth corpus (the complete archive); 23 consecutive held-out sheets without a single falsification of the frozen constraint model. The main repo is private — this is the public write-up.
+> **English summary**: Reads handwritten Japanese amateur-baseball scorebooks from photos into structured at-bat data — no paid APIs, no cloud OCR. Deterministic computer vision (OpenCV on a Raspberry Pi 5) fused with a base-running constraint solver that only accepts readings consistent with legal baseball plays. 82% pooled occupancy accuracy on a 25-game hand-transcribed ground-truth corpus (the complete archive); 23 consecutive held-out sheets without a single falsification of the frozen constraint model. The main repo is private — this is the public write-up.
 
 ## なぜ「未解決領域」なのか
 
@@ -23,8 +23,8 @@
 ## 実績（2026-07 時点）
 
 - ground truth: **25試合分を全打席レベルで手転記（原本アーカイブ完結）**（複数の記録者・筆記具・シート品質。促進タイブレークや両面ペアなどの特殊ケースを含む）
-- 塁占有の総合精度: **pooled 81%**（テンプレ認識単体 45% → ソルバー統合で +36pt）
-- 認識距離 v2（2026-07）: 記法慣習に根ざした第3の距離項を追加し、認識段を 41%→45% に改善（最終段は制約ソルバーの組み替えノイズ域内のため +1pt を暫定値として正直に記録）
+- 塁占有の総合精度: **pooled 82%**（テンプレ認識単体 53% → ソルバー統合で +29pt）
+- 認識層の改良2段（2026-07）: 記法慣習に根ざした距離項の追加と、注記の混入を防ぐ**切り出しの多候補化**で認識段を 41%→53% に改善。最終段は 80%→82%（制約ソルバーの組み替えノイズ1振幅ぶんの上振れ＝「有望・未証明」として正直に記録し、頑健な成果は認識段側とする）
 - **モデル凍結後に転記した held-out 23枚連続で、制約モデルが一度も反証されていない**（パーフェクト読解のシートも出現）
 
 ## 独立データとの相互検証（2026-07）
