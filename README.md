@@ -4,7 +4,7 @@
 
 **本体リポジトリ: [`baseball-scorebook-ocr`](https://github.com/yasumorishima/baseball-scorebook-ocr) 🔒 private** — 記法解読・ソルバー設計・ground truth 転記規約などのノウハウと実データは非公開です（the method is the product）。この repo では公開できる範囲の設計思想・実績・開発プロセスを紹介します。
 
-> **English summary**: Reads handwritten Japanese amateur-baseball scorebooks from photos into structured at-bat data — no paid APIs, no cloud OCR. Deterministic computer vision (OpenCV on a Raspberry Pi 5) fused with a base-running constraint solver that only accepts readings consistent with legal baseball plays. 80% pooled occupancy accuracy on a 25-game hand-transcribed ground-truth corpus (the complete archive); 23 consecutive held-out sheets without a single falsification of the frozen constraint model. The main repo is private — this is the public write-up.
+> **English summary**: Reads handwritten Japanese amateur-baseball scorebooks from photos into structured at-bat data — no paid APIs, no cloud OCR. Deterministic computer vision (OpenCV on a Raspberry Pi 5) fused with a base-running constraint solver that only accepts readings consistent with legal baseball plays. 81% pooled occupancy accuracy on a 25-game hand-transcribed ground-truth corpus (the complete archive); 23 consecutive held-out sheets without a single falsification of the frozen constraint model. The main repo is private — this is the public write-up.
 
 ## なぜ「未解決領域」なのか
 
@@ -23,12 +23,13 @@
 ## 実績（2026-07 時点）
 
 - ground truth: **25試合分を全打席レベルで手転記（原本アーカイブ完結）**（複数の記録者・筆記具・シート品質。促進タイブレークや両面ペアなどの特殊ケースを含む）
-- 塁占有の総合精度: **pooled 80%**（テンプレ単体 ~40% → ソルバー統合でほぼ倍増）
+- 塁占有の総合精度: **pooled 81%**（テンプレ認識単体 45% → ソルバー統合で +36pt）
+- 認識距離 v2（2026-07）: 記法慣習に根ざした第3の距離項を追加し、認識段を 41%→45% に改善（最終段は制約ソルバーの組み替えノイズ域内のため +1pt を暫定値として正直に記録）
 - **モデル凍結後に転記した held-out 23枚連続で、制約モデルが一度も反証されていない**（パーフェクト読解のシートも出現）
 
 ## 独立データとの相互検証（2026-07）
 
-チームサイトに手入力されていた試合別成績（別の人手・別の情報源）と、GT 由来の選手別成績を9試合ぶん突合しました。**7/9 試合でスコアが完全一致、選手単位でも大部分のスロットが桁単位で一致**（単打+三塁打+本塁打+四球+打点5 という行まで一致）。さらに GT 側で「判読曖昧」とフラグしていたグリフ5つが、シート自身の集計行とサイトデータの両方から同じ向きに確定しました。逆にサイト側の入力ミス候補（スコアの1点違い・交代選手の打席二重計上など）も特定でき、**相互検証が双方向に機能する**ことを確認しています。
+チームサイトに手入力されていた試合別成績（別の人手・別の情報源）と、GT 由来の選手別成績を9試合ぶん突合しました。**7/9 試合でスコアが完全一致、選手単位でも大部分のスロットが桁単位で一致**（単打+三塁打+本塁打+四球+打点5 という行まで一致）。さらに GT 側で「判読曖昧」とフラグしていたグリフ5つが、シート自身の集計行とサイトデータの両方から同じ向きに確定しました。逆にサイト側の入力ミス候補（スコアの1点違い・交代選手の打席二重計上・死球の記録漏れなど）も特定でき、**相互検証が双方向に機能する**ことを確認しています。残っていた食い違い2試合も原本の再精査で決着し（うち1試合は転記時に見落としていたシート自身のラインスコアが裁定者になり、GT 側を訂正）、紙で答えられる疑問は全てクローズしました。
 
 ## 開発プロセスの規律
 
