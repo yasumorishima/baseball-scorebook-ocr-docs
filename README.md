@@ -4,7 +4,7 @@
 
 **本体リポジトリ: [`baseball-scorebook-ocr`](https://github.com/yasumorishima/baseball-scorebook-ocr) 🔒 private** — 記法解読・ソルバー設計・ground truth 転記規約などのノウハウと実データは非公開です（the method is the product）。この repo では公開できる範囲の設計思想・実績・開発プロセスを紹介します。
 
-> **English summary**: Reads handwritten Japanese amateur-baseball scorebooks from photos into structured at-bat data — no paid APIs, no cloud OCR. Deterministic computer vision (OpenCV on a Raspberry Pi 5) fused with a base-running constraint solver that only accepts readings consistent with legal baseball plays. 84% pooled occupancy accuracy on a 25-game hand-transcribed ground-truth corpus (the complete archive); 23 consecutive held-out sheets without a single falsification of the frozen constraint model. The main repo is private — this is the public write-up.
+> **English summary**: Reads handwritten Japanese amateur-baseball scorebooks from photos into structured at-bat data — no paid APIs, no cloud OCR. Deterministic computer vision (OpenCV on a Raspberry Pi 5) fused with a base-running constraint solver that only accepts readings consistent with legal baseball plays. 83% pooled occupancy accuracy on a 25-game hand-transcribed ground-truth corpus (the complete archive), on a measured-corner pool that keeps widening as previously invisible marks are surgically recovered; 23 consecutive held-out sheets without a single falsification of the frozen constraint model. The main repo is private — this is the public write-up.
 
 ## なぜ「未解決領域」なのか
 
@@ -23,8 +23,9 @@
 ## 実績（2026-07 時点）
 
 - ground truth: **25試合分を全打席レベルで手転記（原本アーカイブ完結）**（複数の記録者・筆記具・シート品質。促進タイブレークや両面ペアなどの特殊ケースを含む）
-- 塁占有の総合精度: **pooled 84%**（テンプレ認識単体 54% → ソルバー統合で +30pt）
+- 塁占有の総合精度: **pooled 83%**（テンプレ認識単体 54% → ソルバー統合で +29pt。回収系の改良で計測対象そのものが広がり続けているため、比率より「旧対象を壊さず絶対数を積む」ことを規律にしている）
 - 認識層の改良3段（2026-07）: 記法慣習に根ざした距離項の追加、注記の混入を防ぐ**切り出しの多候補化**、字形に重なった別マークを剥がす外科的切り出しで認識段を 41%→54% に改善。さらに走塁トレースに溶接されて一度も切り出せていなかった記号の回収で対象自体を広げ、最終段は 80%→84%（制約ソルバーの組み替えノイズ1振幅ぶんの上振れ＝「有望・未証明」として正直に記録し、頑健な成果は認識段側とする。3段目は入れ替わりゼロのクリーンな +1 セル、回収は既存対象の破壊ゼロで +4 修復）
+- 溶接記号の外科的回収（2026-07 続報）: トレースに完全に溶接された記号は、骨格の through-path を切除した「残り」がグリフか単なるトレースの弧かを**骨格形状ゲート**（長さ・端点数）で判別することで初めて安全に回収できるようになった（無ゲートだと偽発火 44:1 で棄却していた層）。対象 284→287、旧ミスリストは1行も入れ替わらず絶対数 +1
 - **モデル凍結後に転記した held-out 23枚連続で、制約モデルが一度も反証されていない**（パーフェクト読解のシートも出現）
 
 ## 独立データとの相互検証（2026-07）
