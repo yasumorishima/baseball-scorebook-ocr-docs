@@ -4,7 +4,7 @@
 
 **本体リポジトリ: [`baseball-scorebook-ocr`](https://github.com/yasumorishima/baseball-scorebook-ocr) 🔒 private** — 記法解読・ソルバー設計・ground truth 転記規約などのノウハウと実データは非公開です（the method is the product）。この repo では公開できる範囲の設計思想・実績・開発プロセスを紹介します。
 
-> **English summary**: Reads handwritten Japanese amateur-baseball scorebooks from photos into structured at-bat data — no paid APIs, no cloud OCR. Deterministic computer vision (OpenCV on a Raspberry Pi 5) fused with a base-running constraint solver that only accepts readings consistent with legal baseball plays. 88% pooled occupancy accuracy on a 29-sheet hand-transcribed ground-truth corpus (the complete archive, now growing live — the latest game was transcribed and verified the day it was played), on a measured-corner pool that keeps widening as previously invisible marks are surgically recovered; 27 consecutive held-out sheets without a single falsification of the frozen constraint model. The main repo is private — this is the public write-up.
+> **English summary**: Reads handwritten Japanese amateur-baseball scorebooks from photos into structured at-bat data — no paid APIs, no cloud OCR. Deterministic computer vision (OpenCV on a Raspberry Pi 5) fused with a base-running constraint solver that only accepts readings consistent with legal baseball plays. 93% pooled occupancy accuracy on a 29-sheet hand-transcribed ground-truth corpus (the complete archive, now growing live — the latest game was transcribed and verified the day it was played), on a measured-corner pool that keeps widening as previously invisible marks are surgically recovered; 27 consecutive held-out sheets without a single falsification of the frozen constraint model. The main repo is private — this is the public write-up.
 
 ## なぜ「未解決領域」なのか
 
@@ -23,9 +23,10 @@
 ## 実績（2026-07 時点）
 
 - ground truth: **27試合分を全打席レベルで手転記（過去アーカイブ完結 + 新しい試合を当日取込み中）**（複数の記録者・筆記具・シート品質。促進タイブレークや両面ペア、記録漏れだらけの面などの特殊ケースを含む。最新の試合は**試合当日の夜に転記・検証まで完了**＝パイプラインが「生きた運用」に入った）
-- 塁占有の総合精度: **pooled 88%**（テンプレ認識単体 62% → ソルバー統合で +26pt。回収系の改良で計測対象そのものが広がり続けているため、比率より「旧対象を壊さず絶対数を積む」ことを規律にしている）
+- 塁占有の総合精度: **pooled 93%**（テンプレ認識単体 76% → ソルバー統合で +17pt。回収系の改良で計測対象そのものが広がり続けているため、比率より「旧対象を壊さず絶対数を積む」ことを規律にしている）
 - 認識層の改良4段（2026-07）: 記法慣習に根ざした距離項の追加、注記の混入を防ぐ**切り出しの多候補化**、字形に重なった別マークを剥がす外科的切り出し、そして**ラベルごとの照合を最近傍1個から上位2個の平均に変更**（外れテンプレ1個でサンプルを奪える構造を解消）で認識段を 41%→**59%** に改善。さらに走塁トレースに溶接されて一度も切り出せていなかった記号の回収で対象自体を広げ、最終段は 80%→**85%**。4段目は全段（認識・制約・結合・最終）が同時に改善したため、以前の『制約ソルバーの組み替えノイズ1振幅ぶんの上振れ＝有望・未証明』とは性質が異なる（修復18/破壊7）
 - 認識層の改良5段目（2026-07-26）: 照合の距離そのものを入れ替え、最終段を **85%→88%** に改善（修復13/破壊3、全29試合の実行可能性チェックは維持）。従来は二値画像の重なり率で字形を比べており、数ピクセルのずれで重なりが消えるため「一度だけ太らせてから比べる」という緩和策を挟んでいた。これは *ずれているかどうか* を一つの太さで決め打ちする粗い近似なので、**ずれの実量で距離を測る方式（距離変換）**に置き換えた。既存の緩和策が効いていた事実そのものが、この方向の根拠だった。認識段だけの比較でも 198→209（他条件を完全に固定した対照実験）
+- 認識層の改良6段目（2026-07-27）: 距離が **ずれの量は測っていたが向きを測っていなかった**＝どのインクもどのインクに寄れる状態だったので、インクを**ストロークの接線方向で分箱し、同じ向きのお手本にしか距離を課金しない**方式に変更。字形の芯だけでなく、括弧付き数字と裸の記号を分ける**記法の項にも同じ処理**を当てた2段構えで、最終段 **88%→93%**、認識段は **62%→76%**。2段とも認識・制約・結合・最終の全段が同時に改善（修復14/破壊5、修復10/破壊2、全29試合の実行可能性チェックは維持）。**接線を測る範囲の広さ**が実は最も効くパラメータで、実装時に置いたままだった値から狭める方向が正解だった（直感と逆）。なお最終段の +8 のうち 2 程度は調整由来（近傍を1軸ずつ振ると 320±2）で、**頑健なのは認識段の利得**という区別も記録している
 - 溶接記号の外科的回収（2026-07 続報）: トレースに完全に溶接された記号は、骨格の through-path を切除した「残り」がグリフか単なるトレースの弧かを**骨格形状ゲート**（長さ・端点数）で判別することで初めて安全に回収できるようになった（無ゲートだと偽発火 44:1 で棄却していた層）。対象 284→287、旧ミスリストは1行も入れ替わらず絶対数 +1
 - **モデル凍結後に転記した held-out 27枚連続で、制約モデルが一度も反証されていない**（パーフェクト読解のシートも出現）
 
