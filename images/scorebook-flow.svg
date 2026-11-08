@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="680" height="640" viewBox="0 0 680 640" font-family="'Noto Sans JP','Hiragino Sans','Yu Gothic','Meiryo',sans-serif">
+  <rect width="680" height="640" fill="#ffffff"/>
+  <defs>
+    <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto">
+      <path d="M0,0 L10,5 L0,10 z" fill="#555"/>
+    </marker>
+  </defs>
+  <g font-size="18" fill="#222" text-anchor="middle">
+    <rect x="170" y="16" width="380" height="48" rx="8" fill="#f2f4f7" stroke="#8a94a6"/>
+    <text x="360" y="47">スコアブック 2 枚（自軍・相手）を撮る</text>
+    <rect x="170" y="90" width="380" height="48" rx="8" fill="#f2f4f7" stroke="#8a94a6"/>
+    <text x="360" y="121">向きをそろえる（横長・上下）</text>
+    <rect x="170" y="164" width="380" height="48" rx="8" fill="#f2f4f7" stroke="#8a94a6"/>
+    <text x="360" y="195">回ごとの得点の欄を読む</text>
+    <rect x="90" y="246" width="250" height="48" rx="8" fill="#f2f4f7" stroke="#8a94a6"/>
+    <text x="215" y="277">自軍のシート → 打撃</text>
+    <rect x="380" y="246" width="250" height="48" rx="8" fill="#f2f4f7" stroke="#8a94a6"/>
+    <text x="505" y="277">相手のシート → 投手</text>
+    <rect x="170" y="330" width="380" height="52" rx="8" fill="#fff4e5" stroke="#d9822b" stroke-width="2"/>
+    <text x="360" y="363" font-weight="bold">検算が合うか</text>
+    <rect x="170" y="420" width="380" height="48" rx="8" fill="#f2f4f7" stroke="#8a94a6"/>
+    <text x="360" y="451">紙で決まらない点だけチームに聞く</text>
+    <rect x="170" y="494" width="380" height="48" rx="8" fill="#f2f4f7" stroke="#8a94a6"/>
+    <text x="360" y="525">登録して合計を読み返す</text>
+    <rect x="170" y="568" width="380" height="48" rx="8" fill="#f2f4f7" stroke="#8a94a6"/>
+    <text x="360" y="599">サイトの画面で確かめる</text>
+  </g>
+  <g stroke="#555" stroke-width="2" fill="none" marker-end="url(#a)">
+    <line x1="360" y1="64" x2="360" y2="88"/>
+    <line x1="360" y1="138" x2="360" y2="162"/>
+    <line x1="300" y1="212" x2="230" y2="244"/>
+    <line x1="420" y1="212" x2="490" y2="244"/>
+    <line x1="215" y1="294" x2="290" y2="328"/>
+    <line x1="505" y1="294" x2="430" y2="328"/>
+    <line x1="360" y1="382" x2="360" y2="418"/>
+    <line x1="360" y1="468" x2="360" y2="492"/>
+    <line x1="360" y1="542" x2="360" y2="566"/>
+    <path d="M170,356 L40,356 L40,188 L168,188"/>
+  </g>
+  <g font-size="16" fill="#b35c00" text-anchor="middle">
+    <text x="62" y="272" transform="rotate(-90 62 272)">合わない → 読み直す</text>
+  </g>
+  <text x="385" y="406" font-size="16" fill="#555">合う</text>
+</svg>
