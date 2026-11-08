@@ -8,13 +8,15 @@
 - **[スコアブックから個人成績をまとめる手順](stats-from-scorebook.md)**：読んで登録する流れと、数字が合っているかの検算
 - **[Claude Code のスキルのひな形](claude-code/scorebook-stats/SKILL.md)**：写真を貼るだけで、読み取り・検算・登録まで進めるための手順書
 
-> **English summary**: Reads handwritten Japanese amateur-baseball scorebooks from photos into structured at-bat data — no paid APIs, no cloud OCR. Deterministic computer vision (OpenCV on a Raspberry Pi 5) fused with a base-running constraint solver that only accepts readings consistent with legal baseball plays. 93% pooled occupancy accuracy on a 31-sheet hand-transcribed ground-truth corpus (the complete archive, now growing live — the latest game was transcribed and verified the day it was played), on a measured-corner pool that keeps widening as previously invisible marks are surgically recovered; 29 consecutive held-out sheets without a single falsification of the frozen constraint model. The main repo is private — this is the public write-up.
+> **English summary**: Reads handwritten Japanese amateur-baseball scorebooks from photos into a line score and per-player batting lines. Since 2026-10 the reader is Claude (Opus) on column crops cut out by our own grid detection, with a second Opus read that flags cells where the two reads disagree. On 33 hand-transcribed sheets Claude alone gets 370/396 corner digits (93%) against 283 for our own no-hints computer vision; plate-appearance results 859/941 and the line score 25/33 sheets. Against the team site's hand-entered stats (19 games, 185 batting-order rows) all main counts match on 153 rows (83%) and the line score on 17/19 games; checking every difference on paper also found about 20 input errors on the site. About $0.6 per game. Every API run is pre-registered with a cost cap. The earlier no-API pipeline (OpenCV on a Raspberry Pi 5 plus a base-running constraint solver) is kept below as the development record. Photos and ground truth with real names stay in a private repo.
 
 ## なぜ「未解決領域」なのか
 
 日本の野球スコアブックは独自の記号体系（守備番号の連鎖、塁到達マーク、アウトを表すローマ数字、盗塁・暴投などの機構表記…）を持ち、そこに記録者ごとの手書きの揺れ・省略・書き損じ・シート品質差が重なります。汎用 OCR やマルチモーダル LLM に写真を丸ごと渡しても実用精度は出ません（実測して確認済み）。「どの AI もまだ解けていない」ドメインです。
 
-## アプローチ: 有料 LLM Vision から、無課金 CV + 制約ソルバーへ
+## アプローチ
+
+**2026-10 から、読み手は Claude（Opus）です**（下の「実績（2026-11 時点）」）。写真から格子を自前で検出し、列ごとに切り出した画像を Claude に読ませ、打席・得点・角の数字から得点表と打順ごとの成績を組み立てます。同じ列をもう一度 Opus に読ませ、2 回の読みが割れたマスに印を付けます。以下はそれまで（2026-07〜10）の、API を使わない方式の説明です。
 
 初期は LLM Vision に前処理済みクロップを渡す方式を検証しましたが、2026-07 に方針を全面転換し、**API 課金ゼロの決定論的パイプライン**を構築しました。
 
@@ -24,7 +26,23 @@
 
 鍵は最後の**制約ソルバー**です。テンプレート認識単体では最難クラスのマークは 4 割程度しか当たりませんが、「野球のルール上、合法な走塁として成立する読みしか受理しない」という制約層を重ねることで、複数の候補読みの中から唯一の整合解を選び出します。曖昧な手書きグリフも、イニングのアウト数・得点・走者の追い越し禁止といった試合の算術が裁定してくれます。
 
-## 実績（2026-08 時点）
+## 実績（2026-11 時点）
+
+数字はすべて Claude Code cloud で測ったもの。正解データ（33 枚）は人の手で全打席を書き起こしたもの、サイトの成績は別の人がチームのサイトに手入力したものです。
+
+- **角の数字（塁を進んだ打席の番号など・396 か所）**：Claude が何も渡されずに **370（93%）**。自作 CV（何も渡さない）は 283（71%）、自作の論理（ソルバー）を足しても Claude の読みはほとんど良くならない（2026-10-14・事前登録）。
+- **得点・三振も読ませた読み方（2026-10-21）**：打席の結果 **859/941**、三振 132/133、得点表が正解と全部一致 **25/33 枚**（読み方を変える前は 16/33）。
+- **チームのサイトとの照合（2026-11-08・19 試合）**：打順の行 185 のうち、主な 8 項目（打席・打数・安打・二塁打・三塁打・本塁打・四死球・三振）が全部一致 **153 行（83%）**、回ごとの得点が一致 **17/19 試合**。両チームの用紙のどちらが自チームかは、サイトの回ごとの得点で自動で選べた（19/19）。
+- **違いは全部、用紙で確かめる**：違いの多くはツールの外れでしたが、サイト側の入力ミスも約 20 件見つかり（盗塁・三振の記入漏れ、抜けた打席、打点など）、チームの担当者に伝えました。
+- **規則に合わせた直し（2026-11-08）**：タイブレークで置かれた走者の得点を数える。打点は公認野球規則 9.04 どおり（失策・暴投・盗塁で還った点は原則打点にしない）。決めた材料と別の試合で確かめてから入れました。
+- **費用**：1 試合（両チームの用紙＋自チームの 2 回目の読み）で約 $0.6。API を呼ぶ前に毎回、上限の費用を書いた事前登録を置き、回数と費用を記録しています（19 試合の全数テストは 1311 回・$12.19）。
+- **試したが採らなかったもの（2026-10-28）**：読み手を別のモデルに替える・2 回目の読みを軽いモデルにする・3 回読んで多数決、など。どれも事前登録した条件に届かなかった。
+
+## CV＋ソルバーの記録（2026-07〜10・Raspberry Pi 5）
+
+以下は API を使わない方式の開発記録です（数字は Raspberry Pi 5 で測ったもの。cloud の x86 では切り出せる角の数が変わるので、そのまま比べません）。
+
+### 実績（2026-08 時点）
 
 - ground truth: **31シート分を全打席レベルで手転記（同一試合の表裏ペアを含む）（過去アーカイブ完結 + 新しい試合を当日取込み中）**（複数の記録者・筆記具・シート品質。促進タイブレークや両面ペア、記録漏れだらけの面などの特殊ケースを含む。最新の試合は**試合当日の夜に転記・検証まで完了**＝パイプラインが「生きた運用」に入った）
 - 塁占有の総合精度: **pooled 93%**（テンプレ認識単体 76% → ソルバー統合で +17pt。回収系の改良で計測対象そのものが広がり続けているため、比率より「旧対象を壊さず絶対数を積む」ことを規律にしている）
@@ -280,7 +298,7 @@
 
 **次は計器でなくモデルを変えます**——序数の厳密一致を要求するのをやめ、**不一致を費用として払わせ**、実行可能性で刈る。硬い緩和（欠落を全面的に許す）は既に測って却下しています（候補 15,157・実行可能性の後でも中央値 84）。それが「門を広げる」のではなく「費用にする」ことの根拠です。
 
-## 独立データとの相互検証（2026-07）
+## 独立データとの相互検証（2026-07・2026-11 は上の「実績（2026-11 時点）」）
 
 チームサイトに手入力されていた試合別成績（別の人手・別の情報源）と、GT 由来の選手別成績を9試合ぶん突合しました。**7/9 試合でスコアが完全一致、選手単位でも大部分のスロットが桁単位で一致**（単打+三塁打+本塁打+四球+打点5 という行まで一致）。さらに GT 側で「判読曖昧」とフラグしていたグリフ5つが、シート自身の集計行とサイトデータの両方から同じ向きに確定しました。逆にサイト側の入力ミス候補（スコアの1点違い・交代選手の打席二重計上・死球の記録漏れなど）も特定でき、**相互検証が双方向に機能する**ことを確認しています。残っていた食い違い2試合も原本の再精査で決着し（うち1試合は転記時に見落としていたシート自身のラインスコアが裁定者になり、GT 側を訂正）、紙で答えられる疑問は全てクローズしました。
 
@@ -288,16 +306,17 @@
 
 - **frozen model + held-out 評価**: 認識モデルは凍結し、新しく転記するシートはまず「答えを見せない汎化テスト」として評価してからテンプレートに取り込む
 - **honesty ledger**: テンプレート追加のたびに「直った旧ミス」と「新たに壊れたセル」を両方記録する（テンプレ増は非単調に効く。良い話だけを書かない）
-- **敵対的レビュー**: 転記データは毎回 LLM による整合レビューにかけ、走塁の合法性・得点の算術を突合する（実際に人間の転記バグを検出した実績あり）。ただし認識パイプライン自体に生成 AI は使わない
+- **敵対的レビュー**: 転記データは毎回 LLM による整合レビューにかけ、走塁の合法性・得点の算術を突合する（実際に人間の転記バグを検出した実績あり）。2026-10 からは読み手そのものも Claude（Opus）で、2 回目の読み（Opus による見直し）で食い違うマスに印を付ける
+- **API は事前登録してから**: 呼ぶ前に、何を測るか・成立の条件・費用の上限を書いて凍結し、結果を見てから条件や正解を変えない
 - **個人情報の分離**: 選手名は転記データに含めず、スコアブック画像・実試合データはリポジトリ外で管理する
 
 ## 応用先
 
-草野球チームのサイトの試合別成績データ基盤。2026年シーズンの打撃集計は本パイプラインの ground truth データから作成済みです。
+草野球チームのサイトの試合別成績データ基盤。2026年シーズンの打撃集計は本パイプラインの ground truth データから作成済みです。2026-11 からは、新しい試合の用紙を読んでサイトの成績と照らし合わせ、サイトの入力ミスを見つける用途にも使っています。
 
 ## 環境
 
-Raspberry Pi 5 上の Python + OpenCV（headless）。クラウド・有料 API は不使用です。
+Python + OpenCV（headless）。格子の検出と切り出しは自前、読み取りは Claude API（Opus）。開発は Raspberry Pi 5 と Claude Code cloud の両方（2026-10 から）。API を使わない CV＋ソルバーの部品も残しています。
 
 ---
 
