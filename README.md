@@ -6,6 +6,7 @@
 
 - **[手書きのスコアブックの記号の読み方](notation.md)**：1 マスの見方、打者の結果・走者の進みの書き方、実物で出会った記録者ごとの書き方の違い
 - **[スコアブックから個人成績をまとめる手順](stats-from-scorebook.md)**：読んで登録する流れと、数字が合っているかの検算
+- **[Claude Code のスキルのひな形](claude-code/scorebook-stats/SKILL.md)**：写真を貼るだけで、読み取り・検算・登録まで進めるための手順書
 
 > **English summary**: Reads handwritten Japanese amateur-baseball scorebooks from photos into structured at-bat data — no paid APIs, no cloud OCR. Deterministic computer vision (OpenCV on a Raspberry Pi 5) fused with a base-running constraint solver that only accepts readings consistent with legal baseball plays. 93% pooled occupancy accuracy on a 31-sheet hand-transcribed ground-truth corpus (the complete archive, now growing live — the latest game was transcribed and verified the day it was played), on a measured-corner pool that keeps widening as previously invisible marks are surgically recovered; 29 consecutive held-out sheets without a single falsification of the frozen constraint model. The main repo is private — this is the public write-up.
 
