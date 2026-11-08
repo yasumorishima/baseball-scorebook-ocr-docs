@@ -4,6 +4,8 @@
 
 **本体リポジトリ: [`baseball-scorebook-ocr`](https://github.com/yasumorishima/baseball-scorebook-ocr) 🔒 private** — 記法解読・ソルバー設計・ground truth 転記規約などのノウハウと実データは非公開です（the method is the product）。この repo では公開できる範囲の設計思想・実績・開発プロセスを紹介します。
 
+**スコアブックから個人成績をまとめる手順**（人の目で読んで登録する流れと、数字が合っているかの検算）は [stats-from-scorebook.md](stats-from-scorebook.md) にまとめています。
+
 > **English summary**: Reads handwritten Japanese amateur-baseball scorebooks from photos into structured at-bat data — no paid APIs, no cloud OCR. Deterministic computer vision (OpenCV on a Raspberry Pi 5) fused with a base-running constraint solver that only accepts readings consistent with legal baseball plays. 93% pooled occupancy accuracy on a 31-sheet hand-transcribed ground-truth corpus (the complete archive, now growing live — the latest game was transcribed and verified the day it was played), on a measured-corner pool that keeps widening as previously invisible marks are surgically recovered; 29 consecutive held-out sheets without a single falsification of the frozen constraint model. The main repo is private — this is the public write-up.
 
 ## なぜ「未解決領域」なのか
