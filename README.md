@@ -2,7 +2,7 @@
 
 紙の草野球スコアブックの写真から、打席・走塁データを構造化抽出する研究開発プロジェクトの公開技術解説です。
 
-**本体リポジトリ: [`baseball-scorebook-ocr`](https://github.com/yasumorishima/baseball-scorebook-ocr) 🔒 private** — 選手名を含む正解データとスコアブックの画像は非公開です。この repo では設計の考え方・実績・開発の進め方と、スコアブックを読む・まとめる人向けの資料を公開しています。
+**コード: [`baseball-scorebook-reader`](https://github.com/yasumorishima/baseball-scorebook-reader)（公開・MIT）** — 生成 AI を使わずに読む部品（`cv/`）と、Claude で読むツール（`scorebook/`）。選手名を含む正解データとスコアブックの画像は非公開の [`baseball-scorebook-ocr`](https://github.com/yasumorishima/baseball-scorebook-ocr) 🔒 に置いています。この repo では設計の考え方・実績・開発の進め方と、スコアブックを読む・まとめる人向けの資料を公開しています。
 
 - **[手書きのスコアブックの記号の読み方](notation.md)**：1 マスの見方、打者の結果・走者の進みの書き方、実物で出会った記録者ごとの書き方の違い
 - **[スコアブックから個人成績をまとめる手順](stats-from-scorebook.md)**：読んで登録する流れと、数字が合っているかの検算
@@ -300,4 +300,4 @@ Raspberry Pi 5 上の Python + OpenCV（headless）。クラウド・有料 API 
 
 ---
 
-ソースコードと手法の詳細（記法解読モデル・ソルバーの制約設計・転記規約）は [private リポジトリ](https://github.com/yasumorishima/baseball-scorebook-ocr) 🔒 にあります。興味のある方は [GitHub profile](https://github.com/yasumorishima) からどうぞ。
+コードは [baseball-scorebook-reader](https://github.com/yasumorishima/baseball-scorebook-reader)（MIT）、記号の読み方は [notation.md](notation.md)、成績をまとめる手順は [stats-from-scorebook.md](stats-from-scorebook.md) にあります。選手名を含む正解データと画像だけは非公開です。
